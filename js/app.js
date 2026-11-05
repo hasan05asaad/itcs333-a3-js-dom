@@ -46,6 +46,7 @@
             const li = document.createElement("li");
             li.dataset.id = task.id;
             li.classList.toggle("completed", task.completed);
+            span.classList.toggle("completed",task.completed);
 
             const span = document.createElement("span");
             span.textContent = task.text;
@@ -74,12 +75,13 @@
 
         if (taskText === "") {
             errorMsg.textContent = "Please enter a task.";
+            errorMsg.classList.remove("hidden")
             errorMsg.style.display ="block"
             return;
         }
 
         errorMsg.textContent = "";
-        errorMsg.classList.remove("hidden");
+        errorMsg.classList.add("hidden");
         errorMsg.style.display = "none"
 
         const newTask = {
