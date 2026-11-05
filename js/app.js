@@ -79,7 +79,7 @@
         }
 
         errorMsg.textContent = "";
-        errorMsg.classList.add("hidden");
+        errorMsg.classList.remove("hidden");
         errorMsg.style.display = "none"
 
         const newTask = {
@@ -97,7 +97,7 @@
         renderTasks();
     });
 
-    list.addEventListener("click", function(event) {
+    document.getElementById("todo-list").addEventListener("click", function(event) {
         const li = event.target.closest("li");
 
         if (!li || !list.contains(li)) {
