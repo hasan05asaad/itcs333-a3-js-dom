@@ -4,6 +4,8 @@
 // using event delegation on #todo-list.
 
 // TODO: your code here
+// ITCS333 A3 - To-Do App
+
 (() => {
     const form = document.getElementById("todo-form");
     const input = document.getElementById("todo-input");
@@ -11,125 +13,122 @@
     const errorMsg = document.getElementById("error-msg");
     const counter = document.getElementById("counter");
 
+    // Filter buttons
     const filterButtons = {
         all: document.getElementById("filter-all"),
         active: document.getElementById("filter-active"),
         done: document.getElementById("filter-done")
     };
 
-    let tasks = [];
     let currentFilter = "all";
-    let nextId = 1;
 
+    // Update remaining tasks counter
     function updateCounter() {
-        const remaining = tasks.filter(task => !task.completed).length;
+        const remaining = list.querySelectorAll(
+            "li:not(.completed)"
+        ).length;
 
-        counter.textContent = `${remaining} item${remaining === 1 ? "" : "s"} remaining`;
+        counter.textContent = `${remaining} item(s) left`;
     }
 
-    function renderTasks() {
-        list.innerHTML = "";
+    // Apply selected filter
+    function applyFilter() {
+        const items = list.querySelectorAll("li");
 
-        const visibleTasks = tasks.filter(task => {
-            if (currentFilter === "active") {
-                return !task.completed;
+        items.forEach(item => {
+            const completed = item.classList.contains("completed");
+
+            if (currentFilter === "all") {
+                item.style.display = "";
+            } else if (currentFilter === "active") {
+                item.style.display = completed ? "none" : "";
+            } else if (currentFilter === "done") {
+                item.style.display = completed ? "" : "none";
             }
-
-            if (currentFilter === "done") {
-                return task.completed;
-            }
-
-            return true;
         });
-
-        visibleTasks.forEach(task => {
-            const li = document.createElement("li");
-            li.dataset.id = task.id;
-            li.classList.toggle("completed", task.completed);
-            span.classList.toggle("completed",task.completed);
-
-            const span = document.createElement("span");
-            span.textContent = task.text;
-
-            span.style.textDecoration = task.completed ? "line-through" : "none";
-            span.classList.toggle("completed", task.completed);
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.type = "button";
-            deleteButton.dataset.action = "delete";
-            deleteButton.className = "delete-btn";
-
-            li.appendChild(span);
-            li.appendChild(deleteButton);
-
-            list.appendChild(li);
-        });
-
-        updateCounter();
     }
 
+    // Add a new task
     form.addEventListener("submit", function(event) {
         event.preventDefault();
 
         const taskText = input.value.trim();
 
         if (taskText === "") {
-            errorMsg.textContent = "Please enter a task.";
-            errorMsg.classList.remove("hidden")
-            errorMsg.style.display ="block"
+            errorMsg.hidden = false;
             return;
         }
 
-        errorMsg.textContent = "";
-        errorMsg.classList.add("hidden");
-        errorMsg.style.display = "none"
+        errorMsg.hidden = true;
 
-        const newTask = {
-            id: nextId,
-            text: taskText,
-            completed: false
-        };
+        const li = document.createElement("li");
 
-        nextId++;
+        const span = document.createElement("span");
+        span.textContent = taskText;
+        span.className = "todo-text";
 
-        tasks.push(newTask);
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.type = "button";
+        deleteButton.className = "delete-btn";
+
+        li.appendChild(span);
+        li.appendChild(deleteButton);
+
+        list.appendChild(li);
 
         input.value = "";
 
-        renderTasks();
+        updateCounter();
+        applyFilter();
     });
 
+    // Event delegation: one click listener on the list
     list.addEventListener("click", function(event) {
-        const li = event.target.closest("li");
 
-        if (!li || !list.contains(li)) {
+        // Delete task
+        if (event.target.closest(".delete-btn")) {
+            const item = event.target.closest("li");
+            if (item) {
+                item.remove();
+            }
+
+            updateCounter();
             return;
         }
 
-        const taskId = Number(li.dataset.id);
+        // Toggle completed status
+        const taskText = event.target.closest(".todo-text");
 
-        if (event.target.closest(".delete-btn")) {
-            tasks = tasks.filter(task => task.id !== taskId);
-        } else {
-            const task = tasks.find(task => task.id === taskId);
+        if (taskText && list.contains(taskText)) {
+            const item = taskText.closest("li");
 
-            if (task) {
-                task.completed = !task.completed;
+            if (item) {
+                item.classList.toggle("completed");
             }
-        }
 
-        renderTasks();
+            updateCounter();
+            applyFilter();
+        }
     });
 
-    Object.entries(filterButtons).forEach(function(entry) {
-        const filterName = entry[0];
-        const button = entry[1];
+    // Filter button events
+    Object.keys(filterButtons).forEach(filter => {
 
-        button.addEventListener("click", function() {
-            currentFilter = filterName;
-            renderTasks();
+        filterButtons[filter].addEventListener("click", function() {
+            currentFilter = filter;
+
+            Object.values(filterButtons).forEach(button => {
+                button.classList.remove("filter-active");
+            });
+
+            this.classList.add("filter-active");
+
+            applyFilter();
         });
     });
 
-    renderTasks();
+    // Initial counter
+    updateCounter();
+
 })();
