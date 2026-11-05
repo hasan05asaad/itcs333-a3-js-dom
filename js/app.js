@@ -24,7 +24,7 @@
     function updateCounter() {
         const remaining = tasks.filter(task => !task.completed).length;
 
-        counter.textContent = remaining;
+        counter.textContent = `${remaining} item${remaining === 1 ? "" : "s"} remaining`;
     }
 
     function renderTasks() {
@@ -45,6 +45,7 @@
         visibleTasks.forEach(task => {
             const li = document.createElement("li");
             li.dataset.id = task.id;
+            li.classList.toggle("completed", task.completed);
 
             const span = document.createElement("span");
             span.textContent = task.text;
@@ -78,6 +79,7 @@
         }
 
         errorMsg.textContent = "";
+        errorMsg.classList.add("hidden");
         errorMsg.style.display = "none"
 
         const newTask = {
